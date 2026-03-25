@@ -1,0 +1,12 @@
+/build/
+/log/
+/.llvm-extract/
+*.ll
+*.bc
+*.o
+*.a
+*.so
+compile_commands.json
+.cache/
+.llvm-hdrs/
+*.deb
