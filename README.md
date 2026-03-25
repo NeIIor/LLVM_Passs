@@ -1,5 +1,7 @@
 # FlowSketch — CFG / DFG from LLVM IR
 
+**Languages:** [Русский](README.ru.md)
+
 FlowSketch is a self-contained teaching lab: one LLVM **New PM** plugin (`FlowSketchPass`) exports a compact graph description from a module, injects tiny profiling hooks, and a small **offline** tool merges the static graph with an execution log to produce **Graphviz DOT**.
 
 ## What problem this solves
