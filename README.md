@@ -60,10 +60,22 @@ sh scripts/build_plugin.sh build/libFlowSketchPass.so
 ## One-shot demo
 
 ```sh
-sh scripts/run_demo.sh                    # uses examples/advanced.c
+sh scripts/run_demo.sh                    # uses examples/advanced.c (clang + opt)
 sh scripts/run_demo.sh examples/demo.c    # smaller toy program
+sh scripts/run_demo.sh examples/llvm_course/hello.c   # from lisitsynSA/llvm_course
+sh scripts/run_demo_clang.sh              # same, but clang -fpass-plugin (no opt)
 dot -Tsvg log/flowsketch.dot -o log/flowsketch.svg
 ```
+
+### Examples from [llvm_course / LLVM_Pass](https://github.com/lisitsynSA/llvm_course/tree/main/LLVM_Pass)
+
+The programs in [`examples/llvm_course/`](examples/llvm_course/) are the same **c_examples** used in **lisitsynSA/llvm_course** ([`c_examples` on GitHub](https://github.com/lisitsynSA/llvm_course/tree/main/LLVM_Pass/c_examples)): `hello.c`, `calc.c`, `fact.c`. We **ran them through FlowSketch** and checked in the resulting SVGs:
+
+- [`docs/course_samples/hello.svg`](docs/course_samples/hello.svg)  
+- [`docs/course_samples/calc.svg`](docs/course_samples/calc.svg)  
+- [`docs/course_samples/fact.svg`](docs/course_samples/fact.svg) (program run with argument `6`)
+
+See [`examples/llvm_course/README.md`](examples/llvm_course/README.md) to regenerate. For `fact.c`, pass a numeric argv when running `./build/demo_prof`.
 
 Open `log/flowsketch.svg` in a browser or Inkscape.
 
@@ -127,6 +139,26 @@ Open `log/flowsketch.svg` in a browser or Inkscape.
 - `tools/flowsketch_merge.cpp` — static+dynamic → DOT.
 - `log/static.flow.txt` — rewritten each `opt` invocation.
 - `log/dynamic.flow.log` — produced at runtime (overwrite mode).
+- `scripts/run_demo_clang.sh` — same demo using `clang -fpass-plugin` (no separate `opt`).
+
+## Further reading
+
+The [llvm_course **LLVM_Pass** folder](https://github.com/lisitsynSA/llvm_course/tree/main/LLVM_Pass) walks from pass registration through dumps, uses, transformations, CFG-style instrumentation (`Pass6_cfg.cpp`), and a sample “bad” optimization — useful if you want smaller focused examples or compare with a `clang -fpass-plugin … log.c` style workflow ([course README](https://github.com/lisitsynSA/llvm_course/blob/main/LLVM_Pass/README.md)).
+
+### Compile with `clang -fpass-plugin` (optional)
+
+Like the course, you can instrument in one compilation step. **Only** compile your program with the plugin; compile `flowsketch_rt.c` separately so the runtime is not instrumented.
+
+```sh
+clang -fpass-plugin=build/libFlowSketchPass.so -O0 -g -Iinclude \
+  -c examples/advanced.c -o build/advanced_inst.o
+clang -O0 -g -Iinclude -c runtime/flowsketch_rt.c -o build/rt.o
+clang build/advanced_inst.o build/rt.o -o build/demo_clang
+```
+
+Or run `sh scripts/run_demo_clang.sh` (same steps plus merge + `dot`).
+
+Use a **Clang whose major version matches** the LLVM you linked the plugin against. On macOS with some LLVM builds you may need linker flags (see the [course README](https://github.com/lisitsynSA/llvm_course/blob/main/LLVM_Pass/README.md)).
 
 ## License
 
